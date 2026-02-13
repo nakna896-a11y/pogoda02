@@ -312,6 +312,18 @@ function showStatus(text, isError = false) {
     }
 }
 
+// Безопасно устанавливает textContent (предотвращает ошибку если элемент null)
+function safeSetText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+// Безопасно устанавливает width (предотвращает ошибку если элемент null)
+function safeSetWidth(id, width) {
+    const el = document.getElementById(id);
+    if (el && el.style) el.style.width = width;
+}
+
 function displayTodayWeather(data) {
     const current = data.current;
     const daily = data.daily;
@@ -325,27 +337,27 @@ function displayTodayWeather(data) {
     const humidity = current.relative_humidity_2m;
     const dewPoint = temp - (100 - humidity) / 5;
     
-    document.getElementById('todayCity').textContent = currentCity;
-    document.getElementById('todayTime').textContent = '🕐 ' + timeStr;
-    document.getElementById('todayTemp').textContent = Math.round(current.temperature_2m) + '°C';
-    document.getElementById('todayIconLarge').textContent = weatherIcons[weatherCode] || '🌤️';
-    document.getElementById('todayDesc').textContent = weatherDescriptions[weatherCode] || 'Неизвестно';
-    document.getElementById('todayFeels').textContent = Math.round(current.apparent_temperature) + '°C';
-    document.getElementById('todayHumidity').textContent = current.relative_humidity_2m + '%';
-    document.getElementById('todayWind').textContent = current.wind_speed_10m.toFixed(1) + ' м/с';
-    document.getElementById('todayPressure').textContent = '1013 гПа';
-    document.getElementById('todayVisibility').textContent = (current.visibility / 1000).toFixed(1) + ' км';
-    document.getElementById('todayPrecip').textContent = (current.precipitation || 0).toFixed(1) + ' мм';
-    document.getElementById('todayUVIndex').textContent = '5';
-    document.getElementById('todayDewPoint').textContent = dewPoint.toFixed(1) + '°C';
+    safeSetText('todayCity', currentCity);
+    safeSetText('todayTime', '🕐 ' + timeStr);
+    safeSetText('todayTemp', Math.round(current.temperature_2m) + '°C');
+    safeSetText('todayIconLarge', weatherIcons[weatherCode] || '🌤️');
+    safeSetText('todayDesc', weatherDescriptions[weatherCode] || 'Неизвестно');
+    safeSetText('todayFeels', Math.round(current.apparent_temperature) + '°C');
+    safeSetText('todayHumidity', current.relative_humidity_2m + '%');
+    safeSetText('todayWind', current.wind_speed_10m.toFixed(1) + ' м/с');
+    safeSetText('todayPressure', '1013 гПа');
+    safeSetText('todayVisibility', (current.visibility / 1000).toFixed(1) + ' км');
+    safeSetText('todayPrecip', (current.precipitation || 0).toFixed(1) + ' мм');
+    safeSetText('todayUVIndex', '5');
+    safeSetText('todayDewPoint', dewPoint.toFixed(1) + '°C');
     
     // Влажность процент
-    document.getElementById('todayHumidityPercent').textContent = current.relative_humidity_2m + '%';
-    document.getElementById('todayHumidityBar').style.width = current.relative_humidity_2m + '%';
+    safeSetText('todayHumidityPercent', current.relative_humidity_2m + '%');
+    safeSetWidth('todayHumidityBar', current.relative_humidity_2m + '%');
     
     // УФ индекс
-    document.getElementById('todayUVValue').textContent = '5';
-    document.getElementById('todayUVBar').style.width = '50%';
+    safeSetText('todayUV', '5');
+    safeSetWidth('todayUVBar', '50%');
 }
 
 function displayTomorrowWeather(data) {
@@ -361,26 +373,27 @@ function displayTomorrowWeather(data) {
     
     const avgTemp = Math.round((tomorrowData.maxTemp + tomorrowData.minTemp) / 2);
     
-    document.getElementById('tomorrowCity').textContent = currentCity;
-    document.getElementById('tomorrowTemp').textContent = avgTemp + '°C';
-    document.getElementById('tomorrowIconLarge').textContent = weatherIcons[tomorrowData.weatherCode] || '🌤️';
-    document.getElementById('tomorrowDesc').textContent = weatherDescriptions[tomorrowData.weatherCode] || 'Неизвестно';
-    document.getElementById('tomorrowMax').textContent = Math.round(tomorrowData.maxTemp) + '°C';
-    document.getElementById('tomorrowMin').textContent = Math.round(tomorrowData.minTemp) + '°C';
-    document.getElementById('tomorrowAvg').textContent = avgTemp + '°C';
-    document.getElementById('tomorrowHumidity').textContent = (60 + Math.floor(Math.random() * 30)) + '%';
-    document.getElementById('tomorrowWind').textContent = tomorrowData.windSpeed.toFixed(1) + ' м/с';
-    document.getElementById('tomorrowPrecipProb').textContent = tomorrowData.precipProb + '%';
-    document.getElementById('tomorrowPressure').textContent = (Math.round(Math.random() * 30 + 1000)) + ' гПа';
-    document.getElementById('tomorrowPrecip').textContent = tomorrowData.precipitation.toFixed(1) + ' мм';
+    safeSetText('tomorrowCity', currentCity);
+    safeSetText('tomorrowTemp', avgTemp + '°C');
+    safeSetText('tomorrowIconLarge', weatherIcons[tomorrowData.weatherCode] || '🌤️');
+    safeSetText('tomorrowDesc', weatherDescriptions[tomorrowData.weatherCode] || 'Неизвестно');
+    safeSetText('tomorrowMax', Math.round(tomorrowData.maxTemp) + '°C');
+    safeSetText('tomorrowMin', Math.round(tomorrowData.minTemp) + '°C');
+    safeSetText('tomorrowAvg', avgTemp + '°C');
+    
+    const tomorrowHumidity = (60 + Math.floor(Math.random() * 30));
+    safeSetText('tomorrowHumidity', tomorrowHumidity + '%');
+    safeSetText('tomorrowWind', tomorrowData.windSpeed.toFixed(1) + ' м/с');
+    safeSetText('tomorrowPrecipProb', tomorrowData.precipProb + '%');
+    safeSetText('tomorrowPressure', (Math.round(Math.random() * 30 + 1000)) + ' гПа');
+    safeSetText('tomorrowPrecip', tomorrowData.precipitation.toFixed(1) + ' мм');
     
     // Прогресс-бары
-    document.getElementById('tomorrowPrecipPercent').textContent = tomorrowData.precipProb + '%';
-    document.getElementById('tomorrowPrecipBar').style.width = tomorrowData.precipProb + '%';
+    safeSetText('tomorrowPrecipPercent', tomorrowData.precipProb + '%');
+    safeSetWidth('tomorrowPrecipBar', tomorrowData.precipProb + '%');
     
-    document.getElementById('tomorrowHumidityPercent').textContent = (60 + Math.floor(Math.random() * 30)) + '%';
-    const humidityVal = parseInt(document.getElementById('tomorrowHumidityPercent').textContent);
-    document.getElementById('tomorrowHumidityBar').style.width = humidityVal + '%';
+    safeSetText('tomorrowHumidityPercent', tomorrowHumidity + '%');
+    safeSetWidth('tomorrowHumidityBar', tomorrowHumidity + '%');
 }
 
 function display10DaysWeather(data) {
