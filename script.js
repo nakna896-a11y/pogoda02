@@ -83,6 +83,24 @@ function setupEventListeners() {
     document.getElementById('searchInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') searchCity();
     });
+
+    // Обработчик ввода для подсказок
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        if (query.length > 1) {
+            showSuggestions(query);
+        } else {
+            hideSuggestions();
+        }
+    });
+
+    // Закрытие подсказок при клике вне
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-wrapper')) {
+            hideSuggestions();
+        }
+    });
 }
 
 function showWeatherSection(period) {
@@ -113,6 +131,7 @@ async function searchCity() {
             };
             currentCity = `${result.name}${result.admin1 ? ', ' + result.admin1 : ''}`;
             
+            hideSuggestions();
             loadWeatherData('today');
             document.getElementById('searchInput').value = '';
         } else {
@@ -122,6 +141,67 @@ async function searchCity() {
         console.error('Ошибка при поиске города:', error);
         alert('Ошибка при поиске города');
     }
+}
+
+async function showSuggestions(query) {
+    try {
+        const response = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=ru&format=json`
+        );
+        const data = await response.json();
+        const suggestionsList = document.getElementById('suggestionsList');
+
+        if (data.results && data.results.length > 0) {
+            suggestionsList.innerHTML = '';
+            data.results.forEach(result => {
+                const country = result.country || '';
+                const admin = result.admin1 || '';
+                const displayName = `${result.name}${admin ? ', ' + admin : ''}`;
+                const displaySub = `${country}`;
+
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.innerHTML = `
+                    <div class="suggestion-icon">📍</div>
+                    <div class="suggestion-text">
+                        <div class="suggestion-main">${displayName}</div>
+                        <div class="suggestion-sub">${displaySub}</div>
+                    </div>
+                `;
+
+                item.addEventListener('click', () => {
+                    selectSuggestion(result);
+                });
+
+                suggestionsList.appendChild(item);
+            });
+
+            suggestionsList.classList.add('active');
+        } else {
+            suggestionsList.innerHTML = '';
+            suggestionsList.classList.remove('active');
+        }
+    } catch (error) {
+        console.error('Ошибка при получении подсказок:', error);
+    }
+}
+
+function hideSuggestions() {
+    const suggestionsList = document.getElementById('suggestionsList');
+    suggestionsList.classList.remove('active');
+    suggestionsList.innerHTML = '';
+}
+
+function selectSuggestion(result) {
+    currentCoords = {
+        latitude: result.latitude,
+        longitude: result.longitude
+    };
+    currentCity = `${result.name}${result.admin1 ? ', ' + result.admin1 : ''}`;
+    
+    document.getElementById('searchInput').value = '';
+    hideSuggestions();
+    loadWeatherData('today');
 }
 
 async function loadWeatherData(period) {

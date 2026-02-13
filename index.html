@@ -22,8 +22,11 @@
                 </div>
                 <div class="header-right">
                     <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Введите город..." />
-                        <button id="searchBtn">🔍</button>
+                        <div class="search-wrapper">
+                            <input type="text" id="searchInput" placeholder="Введите город..." autocomplete="off" />
+                            <button id="searchBtn">🔍</button>
+                            <div class="suggestions-list" id="suggestionsList"></div>
+                        </div>
                     </div>
                 </div>
             </div>

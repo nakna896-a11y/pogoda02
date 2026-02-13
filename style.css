@@ -202,22 +202,17 @@ header {
     animation: fadeInRight 1s ease;
 }
 
-@keyframes fadeInRight {
-    from {
-        opacity: 0;
-        transform: translateX(50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
 }
 
 .search-box input {
     padding: 15px 25px;
     border: none;
     border-radius: 50px;
-    width: 320px;
+    width: 100%;
     font-size: 1.05em;
     background: rgba(255, 255, 255, 0.95);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -234,6 +229,98 @@ header {
 
 .search-box input::placeholder {
     color: #999;
+}
+
+.suggestions-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 15px;
+    margin-top: 8px;
+    max-height: 350px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.suggestions-list.active {
+    display: block;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.suggestion-item {
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #333;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.suggestion-icon {
+    font-size: 1.5em;
+}
+
+.suggestion-text {
+    flex: 1;
+}
+
+.suggestion-main {
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.suggestion-sub {
+    font-size: 0.85em;
+    opacity: 0.7;
+}
+
+.suggestion-item:hover .suggestion-sub {
+    opacity: 1;
+}
+
+.suggestions-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.suggestions-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 10px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
 }
 
 .search-box button {
