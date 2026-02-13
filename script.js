@@ -329,6 +329,9 @@ function displayTodayWeather(data) {
     const daily = data.daily;
     const weatherCode = current.weather_code;
     
+    // Проверяем что все нужные элементы есть в DOM
+    if (!document.getElementById('todayCity')) return console.error('Элементы для погоды сегодня не найдены');
+    
     const currentTime = new Date();
     const timeStr = currentTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     
@@ -362,6 +365,9 @@ function displayTodayWeather(data) {
 
 function displayTomorrowWeather(data) {
     const tomorrow = data.daily;
+    
+    // Проверяем что элементы есть в DOM
+    if (!document.getElementById('tomorrowCity')) return console.error('Элементы для погоды завтра не найдены');
     const tomorrowData = {
         maxTemp: tomorrow.temperature_2m_max[1],
         minTemp: tomorrow.temperature_2m_min[1],
@@ -379,26 +385,25 @@ function displayTomorrowWeather(data) {
     safeSetText('tomorrowDesc', weatherDescriptions[tomorrowData.weatherCode] || 'Неизвестно');
     safeSetText('tomorrowMax', Math.round(tomorrowData.maxTemp) + '°C');
     safeSetText('tomorrowMin', Math.round(tomorrowData.minTemp) + '°C');
-    safeSetText('tomorrowAvg', avgTemp + '°C');
     
     const tomorrowHumidity = (60 + Math.floor(Math.random() * 30));
     safeSetText('tomorrowHumidity', tomorrowHumidity + '%');
     safeSetText('tomorrowWind', tomorrowData.windSpeed.toFixed(1) + ' м/с');
-    safeSetText('tomorrowPrecipProb', tomorrowData.precipProb + '%');
     safeSetText('tomorrowPressure', (Math.round(Math.random() * 30 + 1000)) + ' гПа');
-    safeSetText('tomorrowPrecip', tomorrowData.precipitation.toFixed(1) + ' мм');
     
     // Прогресс-бары
-    safeSetText('tomorrowPrecipPercent', tomorrowData.precipProb + '%');
-    safeSetWidth('tomorrowPrecipBar', tomorrowData.precipProb + '%');
-    
-    safeSetText('tomorrowHumidityPercent', tomorrowHumidity + '%');
     safeSetWidth('tomorrowHumidityBar', tomorrowHumidity + '%');
 }
 
 function display10DaysWeather(data) {
     const daily = data.daily;
     const forecastGrid = document.getElementById('forecastGrid');
+    
+    // Проверяем что элемент существует
+    if (!forecastGrid) {
+        console.error('Элемент forecastGrid не найден в HTML');
+        return;
+    }
     forecastGrid.innerHTML = '';
 
     // Показываем 10 дней
