@@ -231,6 +231,28 @@ header {
     color: #999;
 }
 
+.status-wrapper {
+    margin-top: 12px;
+    text-align: center;
+}
+
+.status-msg {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95em;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.status-msg.error {
+    background: rgba(255, 80, 80, 0.14);
+    border-color: rgba(255,80,80,0.28);
+    color: #ffdede;
+}
+
 .suggestions-list {
     position: absolute;
     top: 100%;

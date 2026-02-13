@@ -211,16 +211,71 @@ async function loadWeatherData(period) {
         );
         const data = await response.json();
 
+        // Проверки ответа
+        if (data && (data.reason || data.error)) {
+            const msg = data.reason || data.error || 'Неизвестная ошибка от API';
+            console.error('API error:', msg);
+            showStatus('Ошибка API: ' + msg, true);
+            return;
+        }
+
+        // Нормализация текущих данных: поддержка `current` и `current_weather`
+        let current = data.current || null;
+        if (!current && data.current_weather) {
+            const cw = data.current_weather;
+            current = {
+                time: cw.time,
+                temperature_2m: cw.temperature,
+                apparent_temperature: cw.temperature,
+                weather_code: cw.weathercode,
+                wind_speed_10m: cw.windspeed,
+                relative_humidity_2m: data.hourly && data.hourly.relativehumidity_2m ? data.hourly.relativehumidity_2m[0] : 50,
+                visibility: (data.hourly && data.hourly.visibility ? data.hourly.visibility[0] : 10000),
+                precipitation: 0
+            };
+        }
+
+        // Если текущие данные полностью отсутствуют, попробуем собрать минимум из daily
+        if (!current && data.daily) {
+            const todayIdx = 0;
+            current = {
+                time: data.daily.time ? data.daily.time[todayIdx] : new Date().toISOString(),
+                temperature_2m: data.daily.temperature_2m_max ? (data.daily.temperature_2m_max[todayIdx] + data.daily.temperature_2m_min[todayIdx]) / 2 : 0,
+                apparent_temperature: data.daily.temperature_2m_max ? (data.daily.temperature_2m_max[todayIdx] + data.daily.temperature_2m_min[todayIdx]) / 2 : 0,
+                weather_code: data.daily.weather_code ? data.daily.weather_code[todayIdx] : 0,
+                wind_speed_10m: data.daily.windspeed_10m_max ? data.daily.windspeed_10m_max[todayIdx] : 0,
+                relative_humidity_2m: 50,
+                visibility: 10000,
+                precipitation: data.daily.precipitation_sum ? data.daily.precipitation_sum[todayIdx] : 0
+            };
+        }
+
+        const normalized = { current: current, daily: data.daily || {} };
+
+        // Сброс сообщений об ошибке при успешном ответе
+        showStatus('');
+
         if (period === 'today') {
-            displayTodayWeather(data);
+            displayTodayWeather(normalized);
         } else if (period === 'tomorrow') {
-            displayTomorrowWeather(data);
+            displayTomorrowWeather(normalized);
         } else if (period === '10days') {
-            display10DaysWeather(data);
+            display10DaysWeather(normalized);
         }
     } catch (error) {
         console.error('Ошибка при загрузке данных о погоде:', error);
-        alert('Ошибка при загрузке данных о погоде');
+        showStatus('Ошибка при загрузке данных о погоде: ' + (error && error.message ? error.message : error), true);
+    }
+}
+
+function showStatus(text, isError = false) {
+    const el = document.getElementById('statusMsg');
+    if (!el) return;
+    el.textContent = text || '';
+    if (isError) {
+        el.classList.add('error');
+    } else {
+        el.classList.remove('error');
     }
 }
 
