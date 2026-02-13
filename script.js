@@ -2,6 +2,10 @@
 let currentCoords = { latitude: 55.7558, longitude: 37.6173 }; // Москва по умолчанию
 let currentCity = 'Москва';
 
+// Кэш для результатов поиска и debounce таймер
+let suggestionsCache = {};
+let searchDebounceTimer = null;
+
 // Иконки погоды
 const weatherIcons = {
     0: '☀️',
@@ -84,12 +88,26 @@ function setupEventListeners() {
         if (e.key === 'Enter') searchCity();
     });
 
-    // Обработчик ввода для подсказок
+    // Обработчик ввода для подсказок с debounce
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.trim();
+        
+        // Отменяем предыдущий таймер
+        if (searchDebounceTimer) {
+            clearTimeout(searchDebounceTimer);
+        }
+        
         if (query.length > 1) {
-            showSuggestions(query);
+            // Если результат в кэше, показываем сразу
+            if (suggestionsCache[query]) {
+                showSuggestionsFromCache(query);
+            } else {
+                // Иначе ждём 500мс перед запросом
+                searchDebounceTimer = setTimeout(() => {
+                    showSuggestions(query);
+                }, 500);
+            }
         } else {
             hideSuggestions();
         }
@@ -149,42 +167,56 @@ async function showSuggestions(query) {
             `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=ru&format=json`
         );
         const data = await response.json();
-        const suggestionsList = document.getElementById('suggestionsList');
-
-        if (data.results && data.results.length > 0) {
-            suggestionsList.innerHTML = '';
-            data.results.forEach(result => {
-                const country = result.country || '';
-                const admin = result.admin1 || '';
-                const displayName = `${result.name}${admin ? ', ' + admin : ''}`;
-                const displaySub = `${country}`;
-
-                const item = document.createElement('div');
-                item.className = 'suggestion-item';
-                item.innerHTML = `
-                    <div class="suggestion-icon">📍</div>
-                    <div class="suggestion-text">
-                        <div class="suggestion-main">${displayName}</div>
-                        <div class="suggestion-sub">${displaySub}</div>
-                    </div>
-                `;
-
-                item.addEventListener('click', () => {
-                    selectSuggestion(result);
-                });
-
-                suggestionsList.appendChild(item);
-            });
-
-            suggestionsList.classList.add('active');
-        } else {
-            suggestionsList.innerHTML = '';
-            suggestionsList.classList.remove('active');
+        
+        // Кэшируем результат
+        if (data.results) {
+            suggestionsCache[query] = data.results;
         }
+        
+        renderSuggestions(data.results || []);
     } catch (error) {
         console.error('Ошибка при получении подсказок:', error);
     }
 }
+
+function showSuggestionsFromCache(query) {
+    const results = suggestionsCache[query] || [];
+    renderSuggestions(results);
+}
+
+function renderSuggestions(results) {
+    const suggestionsList = document.getElementById('suggestionsList');
+
+    if (results && results.length > 0) {
+        suggestionsList.innerHTML = '';
+        results.forEach(result => {
+            const country = result.country || '';
+            const admin = result.admin1 || '';
+            const displayName = `${result.name}${admin ? ', ' + admin : ''}`;
+            const displaySub = `${country}`;
+
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.innerHTML = `
+                <div class="suggestion-icon">📍</div>
+                <div class="suggestion-text">
+                    <div class="suggestion-main">${displayName}</div>
+                    <div class="suggestion-sub">${displaySub}</div>
+                </div>
+            `;
+
+            item.addEventListener('click', () => {
+                selectSuggestion(result);
+            });
+
+            suggestionsList.appendChild(item);
+        });
+
+        suggestionsList.classList.add('active');
+    } else {
+        suggestionsList.innerHTML = '';
+        suggestionsList.classList.remove('active');
+    }
 
 function hideSuggestions() {
     const suggestionsList = document.getElementById('suggestionsList');
@@ -279,6 +311,19 @@ function showStatus(text, isError = false) {
     }
 }
 
+// Утилиты для безопасного доступа к элементам (предотвращают ошибки, если элемент не найден)
+function safeSetText(id, text) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+}
+
+function safeSetWidth(id, width) {
+    const el = document.getElementById(id);
+    if (!el || !el.style) return;
+    el.style.width = width;
+}
+
 function displayTodayWeather(data) {
     const current = data.current;
     const daily = data.daily;
@@ -292,27 +337,27 @@ function displayTodayWeather(data) {
     const humidity = current.relative_humidity_2m;
     const dewPoint = temp - (100 - humidity) / 5;
     
-    document.getElementById('todayCity').textContent = currentCity;
-    document.getElementById('todayTime').textContent = '🕐 ' + timeStr;
-    document.getElementById('todayTemp').textContent = Math.round(current.temperature_2m) + '°C';
-    document.getElementById('todayIconLarge').textContent = weatherIcons[weatherCode] || '🌤️';
-    document.getElementById('todayDesc').textContent = weatherDescriptions[weatherCode] || 'Неизвестно';
-    document.getElementById('todayFeels').textContent = Math.round(current.apparent_temperature) + '°C';
-    document.getElementById('todayHumidity').textContent = current.relative_humidity_2m + '%';
-    document.getElementById('todayWind').textContent = current.wind_speed_10m.toFixed(1) + ' м/с';
-    document.getElementById('todayPressure').textContent = '1013 гПа';
-    document.getElementById('todayVisibility').textContent = (current.visibility / 1000).toFixed(1) + ' км';
-    document.getElementById('todayPrecip').textContent = (current.precipitation || 0).toFixed(1) + ' мм';
-    document.getElementById('todayUVIndex').textContent = '5';
-    document.getElementById('todayDewPoint').textContent = dewPoint.toFixed(1) + '°C';
-    
+    safeSetText('todayCity', currentCity);
+    safeSetText('todayTime', '🕐 ' + timeStr);
+    safeSetText('todayTemp', Math.round(current.temperature_2m) + '°C');
+    safeSetText('todayIconLarge', weatherIcons[weatherCode] || '🌤️');
+    safeSetText('todayDesc', weatherDescriptions[weatherCode] || 'Неизвестно');
+    safeSetText('todayFeels', Math.round(current.apparent_temperature) + '°C');
+    safeSetText('todayHumidity', current.relative_humidity_2m + '%');
+    safeSetText('todayWind', current.wind_speed_10m.toFixed(1) + ' м/с');
+    safeSetText('todayPressure', '1013 гПа');
+    safeSetText('todayVisibility', (current.visibility / 1000).toFixed(1) + ' км');
+    safeSetText('todayPrecip', (current.precipitation || 0).toFixed(1) + ' мм');
+    safeSetText('todayUVIndex', '5');
+    safeSetText('todayDewPoint', dewPoint.toFixed(1) + '°C');
+
     // Влажность процент
-    document.getElementById('todayHumidityPercent').textContent = current.relative_humidity_2m + '%';
-    document.getElementById('todayHumidityBar').style.width = current.relative_humidity_2m + '%';
-    
-    // УФ индекс
-    document.getElementById('todayUVValue').textContent = '5';
-    document.getElementById('todayUVBar').style.width = '50%';
+    safeSetText('todayHumidityPercent', current.relative_humidity_2m + '%');
+    safeSetWidth('todayHumidityBar', current.relative_humidity_2m + '%');
+
+    // УФ индекс — исправлено имя элемента: использую `todayUV`, если он есть
+    safeSetText('todayUV', '5');
+    safeSetWidth('todayUVBar', '50%');
 }
 
 function displayTomorrowWeather(data) {
