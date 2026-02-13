@@ -83,35 +83,44 @@ function setupEventListeners() {
     });
 
     // Обработчик поиска по городу
-    document.getElementById('searchBtn').addEventListener('click', searchCity);
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') searchCity();
-    });
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', searchCity);
+    }
+    
+    const searchInputEnter = document.getElementById('searchInput');
+    if (searchInputEnter) {
+        searchInputEnter.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchCity();
+        });
+    }
 
     // Обработчик ввода для подсказок (с debounce для одновремени запросов)
     const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        
-        // Отменяем предыдущий debounce таймер
-        if (searchDebounceTimer) {
-            clearTimeout(searchDebounceTimer);
-        }
-        
-        if (query.length > 1) {
-            // Если в кэше, показываем сразу
-            if (suggestionsCache[query]) {
-                showSuggestionsFromCache(query);
-            } else {
-                // Иначе ждём 300мс перед API запросом
-                searchDebounceTimer = setTimeout(() => {
-                    showSuggestions(query);
-                }, 300);
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            
+            // Отменяем предыдущий debounce таймер
+            if (searchDebounceTimer) {
+                clearTimeout(searchDebounceTimer);
             }
-        } else {
-            hideSuggestions();
-        }
-    });
+            
+            if (query.length > 1) {
+                // Если в кэше, показываем сразу
+                if (suggestionsCache[query]) {
+                    showSuggestionsFromCache(query);
+                } else {
+                    // Иначе ждём 300мс перед API запросом
+                    searchDebounceTimer = setTimeout(() => {
+                        showSuggestions(query);
+                    }, 300);
+                }
+            } else {
+                hideSuggestions();
+            }
+        });
+    }
 
     // Закрытие подсказок при клике вне
     document.addEventListener('click', (e) => {
@@ -128,11 +137,20 @@ function showWeatherSection(period) {
 
     const sectionId = period === 'today' ? 'todayWeather' : 
                       period === 'tomorrow' ? 'tomorrowWeather' : 'tenDaysWeather';
-    document.getElementById(sectionId).classList.add('active');
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.classList.add('active');
+    }
 }
 
 async function searchCity() {
-    const cityName = document.getElementById('searchInput').value.trim();
+    const searchInputEl = document.getElementById('searchInput');
+    if (!searchInputEl) {
+        console.error('Элемент searchInput не найден');
+        return;
+    }
+    
+    const cityName = searchInputEl.value.trim();
     if (!cityName) return;
 
     try {
@@ -151,7 +169,7 @@ async function searchCity() {
             
             hideSuggestions();
             loadWeatherData('today');
-            document.getElementById('searchInput').value = '';
+            searchInputEl.value = '';
         } else {
             alert('Город не найден');
         }
@@ -186,6 +204,12 @@ function showSuggestionsFromCache(query) {
 
 function renderSuggestionsUI(results) {
     const suggestionsList = document.getElementById('suggestionsList');
+    
+    // Проверяем что элемент существует
+    if (!suggestionsList) {
+        console.error('Элемент suggestionsList не найден в HTML');
+        return;
+    }
 
     if (results && results.length > 0) {
         suggestionsList.innerHTML = '';
@@ -221,6 +245,7 @@ function renderSuggestionsUI(results) {
 
 function hideSuggestions() {
     const suggestionsList = document.getElementById('suggestionsList');
+    if (!suggestionsList) return;
     suggestionsList.classList.remove('active');
     suggestionsList.innerHTML = '';
 }
@@ -232,7 +257,10 @@ function selectSuggestion(result) {
     };
     currentCity = `${result.name}${result.admin1 ? ', ' + result.admin1 : ''}`;
     
-    document.getElementById('searchInput').value = '';
+    const searchInputEl = document.getElementById('searchInput');
+    if (searchInputEl) {
+        searchInputEl.value = '';
+    }
     hideSuggestions();
     loadWeatherData('today');
 }
