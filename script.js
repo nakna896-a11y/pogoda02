@@ -250,7 +250,7 @@ function renderSuggestionsUI(results) {
             const item = document.createElement('div');
             item.className = 'suggestion-item';
             item.innerHTML = `
-                <div class="suggestion-icon">📍</div>
+                <div class="suggestion-icon"><svg class="suggestion-mini" viewBox="0 0 64 64"><use href="#icon-pin"/></svg></div>
                 <div class="suggestion-text">
                     <div class="suggestion-main">${displayName}</div>
                     <div class="suggestion-sub">${displaySub}</div>
@@ -460,59 +460,49 @@ function renderHourly(data) {
         const temp = Math.round(temps[i]);
         const code = codes[i];
 
-        const card = document.createElement('div');
-        card.className = 'hourly-card';
-        const iconSvg = getWeatherIconSvg(code, dt.getHours());
-        card.innerHTML = `<div class="hourly-time">${hourStr}</div><div class="hourly-icon">${iconSvg}</div><div class="hourly-temp">${temp}°</div>`;
-        hourlyContainer.appendChild(card);
-        slice.push(temp);
+            const card = document.createElement('div');
+            card.className = 'hourly-card';
+            const iconSvg = getWeatherIconSvg(code, dt.getHours());
+            card.innerHTML = `<div class="hourly-time">${hourStr}</div><div class="hourly-icon">${iconSvg}</div><div class="hourly-temp">${temp}°</div>`;
+            hourlyContainer.appendChild(card);
+            slice.push(temp);
     }
 
-    // нарисовать график
+    // обновить Chart.js график
     if (canvas && slice.length) {
-        drawHourlyChart(canvas, slice);
+        const labels = Array.from(hourlyContainer.querySelectorAll('.hourly-time')).map(el => el.textContent);
+        updateHourlyChart(labels, slice);
     }
 }
 
-// Простейший рендер линейного графика на canvas
-function drawHourlyChart(canvas, temps) {
+// Chart.js: инициализация и обновление почасового графика
+let hourlyChartInstance = null;
+function initHourlyChart(canvas) {
+    if (typeof Chart === 'undefined') return null;
     const ctx = canvas.getContext('2d');
-    const w = canvas.width = Math.min(800, canvas.parentElement ? canvas.parentElement.clientWidth : 800);
-    const h = canvas.height = 120;
-    ctx.clearRect(0,0,w,h);
-
-    const padding = 12;
-    const maxT = Math.max(...temps);
-    const minT = Math.min(...temps);
-    const range = Math.max(1, maxT - minT);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    temps.forEach((t, i) => {
-        const x = padding + (i / (temps.length - 1)) * (w - padding * 2);
-        const y = h - padding - ((t - minT) / range) * (h - padding * 2);
-        if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    hourlyChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Температура °C', data: [], borderColor: 'rgba(255,255,255,0.95)', backgroundColor: (ctx) => {
+            const g = ctx.createLinearGradient(0,0,0,120); g.addColorStop(0, 'rgba(255,255,255,0.12)'); g.addColorStop(1,'rgba(255,255,255,0)'); return g;
+        }, fill: true, tension: 0.25, pointRadius: 3 }] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { x: { ticks: { color: 'rgba(255,255,255,0.9)' }, grid: { display: false } }, y: { ticks: { color: 'rgba(255,255,255,0.9)' }, grid: { color: 'rgba(255,255,255,0.06)' } } },
+            plugins: { legend: { display: false }, tooltip: { enabled: true } }
+        }
     });
-    ctx.stroke();
+    return hourlyChartInstance;
+}
 
-    // заливка градиентом
-    const grad = ctx.createLinearGradient(0,0,0,h);
-    grad.addColorStop(0, 'rgba(255,255,255,0.06)');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = grad;
-    ctx.lineTo(w - padding, h - padding);
-    ctx.lineTo(padding, h - padding);
-    ctx.closePath();
-    ctx.fill();
-
-    // точки
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    temps.forEach((t, i) => {
-        const x = padding + (i / (temps.length - 1)) * (w - padding * 2);
-        const y = h - padding - ((t - minT) / range) * (h - padding * 2);
-        ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
-    });
+function updateHourlyChart(labels, data) {
+    const canvas = document.getElementById('hourlyChart');
+    if (!canvas) return;
+    if (!hourlyChartInstance) initHourlyChart(canvas);
+    if (!hourlyChartInstance) return;
+    hourlyChartInstance.data.labels = labels;
+    hourlyChartInstance.data.datasets[0].data = data;
+    hourlyChartInstance.update();
 }
 
 function displayTomorrowWeather(data) {

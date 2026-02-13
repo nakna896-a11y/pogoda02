@@ -395,6 +395,14 @@ header {
     font-size: 1.5em;
 }
 
+.suggestion-mini {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    fill: var(--suggestion-text);
+}
+
 .suggestion-text {
     flex: 1;
 }
