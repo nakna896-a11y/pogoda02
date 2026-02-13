@@ -3,48 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Прогноз Погоды</title>
+    <title>WeatherPro - Прогноз Погоды</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="background-animation">
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
+    </div>
+
     <div class="container">
         <header>
-            <h1>🌤️ Прогноз Погоды</h1>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Введите город..." />
-                <button id="searchBtn">Поиск</button>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🌍 WeatherPro</h1>
+                    <p class="tagline">Ваш персональный метеолог</p>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Введите город..." />
+                        <button id="searchBtn">🔍</button>
+                    </div>
+                </div>
             </div>
         </header>
 
         <div class="buttons-container">
-            <button class="period-btn active" data-period="today">Сегодня</button>
-            <button class="period-btn" data-period="tomorrow">Завтра</button>
-            <button class="period-btn" data-period="10days">10 дней</button>
+            <button class="period-btn active" data-period="today">
+                📅 Сегодня
+            </button>
+            <button class="period-btn" data-period="tomorrow">
+                📆 Завтра
+            </button>
+            <button class="period-btn" data-period="10days">
+                📊 10 дней
+            </button>
         </div>
 
         <div class="content">
             <div id="todayWeather" class="weather-section active">
-                <div class="weather-card">
-                    <div class="city-name" id="todayCity">Загрузка...</div>
-                    <div class="current-weather">
-                        <div class="temp" id="todayTemp">--°C</div>
-                        <div class="weather-desc" id="todayDesc">Загрузка...</div>
-                        <div class="weather-details">
-                            <div class="detail">
-                                <span class="label">Ощущается:</span>
-                                <span id="todayFeels">--°C</span>
+                <div class="weather-main">
+                    <div class="weather-card large-card">
+                        <div class="card-header">
+                            <h2 id="todayCity">Загрузка...</h2>
+                            <span class="time-info" id="todayTime"></span>
+                        </div>
+                        
+                        <div class="weather-display">
+                            <div class="temperature-section">
+                                <div class="weather-icon-large" id="todayIconLarge">🌤️</div>
+                                <div class="temp-info">
+                                    <div class="temp" id="todayTemp">--°C</div>
+                                    <div class="weather-desc" id="todayDesc">Загрузка...</div>
+                                </div>
                             </div>
-                            <div class="detail">
-                                <span class="label">Влажность:</span>
-                                <span id="todayHumidity">--%</span>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-card">
+                                <div class="detail-icon">🌡️</div>
+                                <div class="detail-content">
+                                    <span class="label">Ощущается</span>
+                                    <span id="todayFeels" class="value">--°C</span>
+                                </div>
                             </div>
-                            <div class="detail">
-                                <span class="label">Ветер:</span>
-                                <span id="todayWind">-- м/с</span>
+                            <div class="detail-card">
+                                <div class="detail-icon">💧</div>
+                                <div class="detail-content">
+                                    <span class="label">Влажность</span>
+                                    <span id="todayHumidity" class="value">--%</span>
+                                </div>
                             </div>
-                            <div class="detail">
-                                <span class="label">Давление:</span>
-                                <span id="todayPressure">-- гПа</span>
+                            <div class="detail-card">
+                                <div class="detail-icon">💨</div>
+                                <div class="detail-content">
+                                    <span class="label">Ветер</span>
+                                    <span id="todayWind" class="value">-- м/с</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">🔵</div>
+                                <div class="detail-content">
+                                    <span class="label">Давление</span>
+                                    <span id="todayPressure" class="value">-- гПа</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">👁️</div>
+                                <div class="detail-content">
+                                    <span class="label">Видимость</span>
+                                    <span id="todayVisibility" class="value">-- км</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">☔</div>
+                                <div class="detail-content">
+                                    <span class="label">Осадки</span>
+                                    <span id="todayPrecip" class="value">-- мм</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="progress-item">
+                                <span class="progress-label">Влажность: <span id="todayHumidityPercent">--%</span></span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="todayHumidityBar"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <span class="progress-label">УФ-индекс: <span id="todayUV">--</span></span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="todayUVBar"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -52,27 +124,65 @@
             </div>
 
             <div id="tomorrowWeather" class="weather-section">
-                <div class="weather-card">
-                    <div class="city-name" id="tomorrowCity">Загрузка...</div>
-                    <div class="current-weather">
-                        <div class="temp" id="tomorrowTemp">--°C</div>
-                        <div class="weather-desc" id="tomorrowDesc">Загрузка...</div>
-                        <div class="weather-details">
-                            <div class="detail">
-                                <span class="label">Ощущается:</span>
-                                <span id="tomorrowFeels">--°C</span>
+                <div class="weather-main">
+                    <div class="weather-card large-card">
+                        <div class="card-header">
+                            <h2 id="tomorrowCity">Загрузка...</h2>
+                            <span class="time-info">Завтра</span>
+                        </div>
+                        
+                        <div class="weather-display">
+                            <div class="temperature-section">
+                                <div class="weather-icon-large" id="tomorrowIconLarge">🌤️</div>
+                                <div class="temp-info">
+                                    <div class="temp" id="tomorrowTemp">--°C</div>
+                                    <div class="weather-desc" id="tomorrowDesc">Загрузка...</div>
+                                </div>
                             </div>
-                            <div class="detail">
-                                <span class="label">Влажность:</span>
-                                <span id="tomorrowHumidity">--%</span>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-card">
+                                <div class="detail-icon">🌡️</div>
+                                <div class="detail-content">
+                                    <span class="label">Ощущается</span>
+                                    <span id="tomorrowFeels" class="value">--°C</span>
+                                </div>
                             </div>
-                            <div class="detail">
-                                <span class="label">Ветер:</span>
-                                <span id="tomorrowWind">-- м/с</span>
+                            <div class="detail-card">
+                                <div class="detail-icon">💧</div>
+                                <div class="detail-content">
+                                    <span class="label">Влажность</span>
+                                    <span id="tomorrowHumidity" class="value">--%</span>
+                                </div>
                             </div>
-                            <div class="detail">
-                                <span class="label">Давление:</span>
-                                <span id="tomorrowPressure">-- гПа</span>
+                            <div class="detail-card">
+                                <div class="detail-icon">💨</div>
+                                <div class="detail-content">
+                                    <span class="label">Ветер</span>
+                                    <span id="tomorrowWind" class="value">-- м/с</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">🔵</div>
+                                <div class="detail-content">
+                                    <span class="label">Давление</span>
+                                    <span id="tomorrowPressure" class="value">-- гПа</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">📈</div>
+                                <div class="detail-content">
+                                    <span class="label">Макс. темп.</span>
+                                    <span id="tomorrowMax" class="value">--°C</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">📉</div>
+                                <div class="detail-content">
+                                    <span class="label">Мин. темп.</span>
+                                    <span id="tomorrowMin" class="value">--°C</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -80,7 +190,9 @@
             </div>
 
             <div id="tenDaysWeather" class="weather-section">
-                <h2>Прогноз на 10 дней</h2>
+                <div class="section-header">
+                    <h2>📊 Прогноз на 10 дней</h2>
+                </div>
                 <div class="forecast-grid" id="forecastGrid">
                     <!-- Прогноз будет заполнен JavaScript -->
                 </div>
@@ -88,7 +200,10 @@
         </div>
 
         <footer>
-            <p>Данные получены из Open-Meteo API</p>
+            <div class="footer-content">
+                <p>🌐 Данные получены из Open-Meteo API</p>
+                <p>⚡ Обновляется автоматически</p>
+            </div>
         </footer>
     </div>
 

@@ -61,6 +61,8 @@ const weatherDescriptions = {
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     loadWeatherData('today');
+    // Автообновление каждые 30 минут
+    setInterval(() => loadWeatherData('today'), 30 * 60 * 1000);
 });
 
 function setupEventListeners() {
@@ -81,8 +83,6 @@ function setupEventListeners() {
     document.getElementById('searchInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') searchCity();
     });
-
-    loadWeatherData('today');
 }
 
 function showWeatherSection(period) {
@@ -111,7 +111,7 @@ async function searchCity() {
                 latitude: result.latitude,
                 longitude: result.longitude
             };
-            currentCity = `${result.name}${result.admin1 ? ', ' + result.admin1 : ''}${result.country ? ', ' + result.country : ''}`;
+            currentCity = `${result.name}${result.admin1 ? ', ' + result.admin1 : ''}`;
             
             loadWeatherData('today');
             document.getElementById('searchInput').value = '';
@@ -127,7 +127,7 @@ async function searchCity() {
 async function loadWeatherData(period) {
     try {
         const response = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${currentCoords.latitude}&longitude=${currentCoords.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,pressure&timezone=auto`
+            `https://api.open-meteo.com/v1/forecast?latitude=${currentCoords.latitude}&longitude=${currentCoords.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,pressure,visibility,uv_index,precipitation&timezone=auto`
         );
         const data = await response.json();
 
@@ -146,16 +146,32 @@ async function loadWeatherData(period) {
 
 function displayTodayWeather(data) {
     const current = data.current;
+    const daily = data.daily;
     const weatherCode = current.weather_code;
     
+    const currentTime = new Date();
+    const timeStr = currentTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    
     document.getElementById('todayCity').textContent = currentCity;
+    document.getElementById('todayTime').textContent = '🕐 ' + timeStr;
     document.getElementById('todayTemp').textContent = Math.round(current.temperature_2m) + '°C';
-    document.getElementById('todayDesc').textContent = 
-        (weatherIcons[weatherCode] || '🌤️') + ' ' + (weatherDescriptions[weatherCode] || 'Неизвестно');
+    document.getElementById('todayIconLarge').textContent = weatherIcons[weatherCode] || '🌤️';
+    document.getElementById('todayDesc').textContent = weatherDescriptions[weatherCode] || 'Неизвестно';
     document.getElementById('todayFeels').textContent = Math.round(current.apparent_temperature) + '°C';
     document.getElementById('todayHumidity').textContent = current.relative_humidity_2m + '%';
     document.getElementById('todayWind').textContent = current.wind_speed_10m.toFixed(1) + ' м/с';
     document.getElementById('todayPressure').textContent = Math.round(current.pressure) + ' гПа';
+    document.getElementById('todayVisibility').textContent = (current.visibility / 1000).toFixed(1) + ' км';
+    document.getElementById('todayPrecip').textContent = (current.precipitation || 0).toFixed(1) + ' мм';
+    
+    // Влажность процент
+    document.getElementById('todayHumidityPercent').textContent = current.relative_humidity_2m + '%';
+    document.getElementById('todayHumidityBar').style.width = current.relative_humidity_2m + '%';
+    
+    // УФ индекс
+    const uvIndex = Math.round(current.uv_index);
+    document.getElementById('todayUV').textContent = uvIndex;
+    document.getElementById('todayUVBar').style.width = Math.min(uvIndex * 10, 100) + '%';
 }
 
 function displayTomorrowWeather(data) {
@@ -165,22 +181,22 @@ function displayTomorrowWeather(data) {
         minTemp: tomorrow.temperature_2m_min[1],
         weatherCode: tomorrow.weather_code[1],
         windSpeed: tomorrow.windspeed_10m_max[1],
-        precipitation: tomorrow.precipitation_sum[1]
+        precipitation: tomorrow.precipitation_sum[1],
+        precipProb: tomorrow.precipitation_probability_max[1]
     };
     
     const avgTemp = Math.round((tomorrowData.maxTemp + tomorrowData.minTemp) / 2);
     
     document.getElementById('tomorrowCity').textContent = currentCity;
     document.getElementById('tomorrowTemp').textContent = avgTemp + '°C';
-    document.getElementById('tomorrowDesc').textContent = 
-        (weatherIcons[tomorrowData.weatherCode] || '🌤️') + ' ' + 
-        (weatherDescriptions[tomorrowData.weatherCode] || 'Неизвестно');
+    document.getElementById('tomorrowIconLarge').textContent = weatherIcons[tomorrowData.weatherCode] || '🌤️';
+    document.getElementById('tomorrowDesc').textContent = weatherDescriptions[tomorrowData.weatherCode] || 'Неизвестно';
     document.getElementById('tomorrowFeels').textContent = avgTemp + '°C';
-    document.getElementById('tomorrowHumidity').textContent = 
-        (tomorrowData.precipitation > 0 ? Math.round(tomorrowData.precipitation * 5) : 50) + '%';
+    document.getElementById('tomorrowHumidity').textContent = tomorrowData.precipProb + '%';
     document.getElementById('tomorrowWind').textContent = tomorrowData.windSpeed.toFixed(1) + ' м/с';
-    document.getElementById('tomorrowPressure').textContent = 
-        (Math.round(Math.random() * 30 + 1000)) + ' гПа';
+    document.getElementById('tomorrowPressure').textContent = (Math.round(Math.random() * 30 + 1000)) + ' гПа';
+    document.getElementById('tomorrowMax').textContent = Math.round(tomorrowData.maxTemp) + '°C';
+    document.getElementById('tomorrowMin').textContent = Math.round(tomorrowData.minTemp) + '°C';
 }
 
 function display10DaysWeather(data) {
@@ -191,25 +207,30 @@ function display10DaysWeather(data) {
     // Показываем 10 дней
     for (let i = 0; i < 10; i++) {
         const date = new Date(daily.time[i]);
-        const dateStr = date.toLocaleDateString('ru-RU', { 
-            weekday: 'short', 
-            month: 'short', 
-            day: 'numeric' 
-        });
+        const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' });
+        const dateNum = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
         
         const maxTemp = Math.round(daily.temperature_2m_max[i]);
         const minTemp = Math.round(daily.temperature_2m_min[i]);
         const weatherCode = daily.weather_code[i];
         const icon = weatherIcons[weatherCode] || '🌤️';
         const description = weatherDescriptions[weatherCode] || 'Неизвестно';
+        const windSpeed = daily.windspeed_10m_max[i].toFixed(1);
+        const precipitation = daily.precipitation_sum[i].toFixed(1);
+        const precipProb = daily.precipitation_probability_max[i];
 
         const card = document.createElement('div');
         card.className = 'forecast-card';
         card.innerHTML = `
-            <div class="forecast-date">${dateStr}</div>
+            <div class="forecast-date">${dayName}<br>${dateNum}</div>
             <div class="forecast-icon">${icon}</div>
-            <div class="forecast-temp">${maxTemp}° / ${minTemp}°</div>
             <div class="forecast-desc">${description}</div>
+            <div class="forecast-temp">${maxTemp}°</div>
+            <div class="forecast-temp-range">мин: ${minTemp}°</div>
+            <div class="forecast-details">
+                <div title="Осадки">☔ ${precipitation}мм</div>
+                <div title="Вероятность">💨 ${precipProb}%</div>
+            </div>
         `;
         forecastGrid.appendChild(card);
     }
