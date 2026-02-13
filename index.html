@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогноз Погоды</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌤️ Прогноз Погоды</h1>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Введите город..." />
+                <button id="searchBtn">Поиск</button>
+            </div>
+        </header>
+
+        <div class="buttons-container">
+            <button class="period-btn active" data-period="today">Сегодня</button>
+            <button class="period-btn" data-period="tomorrow">Завтра</button>
+            <button class="period-btn" data-period="10days">10 дней</button>
+        </div>
+
+        <div class="content">
+            <div id="todayWeather" class="weather-section active">
+                <div class="weather-card">
+                    <div class="city-name" id="todayCity">Загрузка...</div>
+                    <div class="current-weather">
+                        <div class="temp" id="todayTemp">--°C</div>
+                        <div class="weather-desc" id="todayDesc">Загрузка...</div>
+                        <div class="weather-details">
+                            <div class="detail">
+                                <span class="label">Ощущается:</span>
+                                <span id="todayFeels">--°C</span>
+                            </div>
+                            <div class="detail">
+                                <span class="label">Влажность:</span>
+                                <span id="todayHumidity">--%</span>
+                            </div>
+                            <div class="detail">
+                                <span class="label">Ветер:</span>
+                                <span id="todayWind">-- м/с</span>
+                            </div>
+                            <div class="detail">
+                                <span class="label">Давление:</span>
+                                <span id="todayPressure">-- гПа</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tomorrowWeather" class="weather-section">
+                <div class="weather-card">
+                    <div class="city-name" id="tomorrowCity">Загрузка...</div>
+                    <div class="current-weather">
+                        <div class="temp" id="tomorrowTemp">--°C</div>
+                        <div class="weather-desc" id="tomorrowDesc">Загрузка...</div>
+                        <div class="weather-details">
+                            <div class="detail">
+                                <span class="label">Ощущается:</span>
+                                <span id="tomorrowFeels">--°C</span>
+                            </div>
+                            <div class="detail">
+                                <span class="label">Влажность:</span>
+                                <span id="tomorrowHumidity">--%</span>
+                            </div>
+                            <div class="detail">
+                                <span class="label">Ветер:</span>
+                                <span id="tomorrowWind">-- м/с</span>
+                            </div>
+                            <div class="detail">
+                                <span class="label">Давление:</span>
+                                <span id="tomorrowPressure">-- гПа</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tenDaysWeather" class="weather-section">
+                <h2>Прогноз на 10 дней</h2>
+                <div class="forecast-grid" id="forecastGrid">
+                    <!-- Прогноз будет заполнен JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Данные получены из Open-Meteo API</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
