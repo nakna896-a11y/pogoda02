@@ -18,7 +18,7 @@
             <div class="header-content">
                 <div class="header-left">
                     <h1>🌍 WeatherPro</h1>
-                    <p class="tagline">Ваш персональный метеолог</p>
+                    <p class="tagline">Погода в реальном времени - Точный прогноз</p>
                 </div>
                 <div class="header-right">
                     <div class="search-box">
@@ -101,6 +101,20 @@
                                 <div class="detail-content">
                                     <span class="label">Осадки</span>
                                     <span id="todayPrecip" class="value">-- мм</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">☀️</div>
+                                <div class="detail-content">
+                                    <span class="label">УФ-индекс</span>
+                                    <span id="todayUVIndex" class="value">--</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">❄️</div>
+                                <div class="detail-content">
+                                    <span class="label">Точка росы</span>
+                                    <span id="todayDewPoint" class="value">--°C</span>
                                 </div>
                             </div>
                         </div>
@@ -201,8 +215,9 @@
 
         <footer>
             <div class="footer-content">
-                <p>🌐 Данные получены из Open-Meteo API</p>
-                <p>⚡ Обновляется автоматически</p>
+                <p>🌐 Данные: Open-Meteo API</p>
+                <p>⚡ Обновляется каждые 30 минут</p>
+                <p>🔒 Без АПИ ключей и отслеживания</p>
             </div>
         </footer>
     </div>

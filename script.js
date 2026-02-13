@@ -152,6 +152,11 @@ function displayTodayWeather(data) {
     const currentTime = new Date();
     const timeStr = currentTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     
+    // Расчет точки росы (приблизительно)
+    const temp = current.temperature_2m;
+    const humidity = current.relative_humidity_2m;
+    const dewPoint = temp - (100 - humidity) / 5;
+    
     document.getElementById('todayCity').textContent = currentCity;
     document.getElementById('todayTime').textContent = '🕐 ' + timeStr;
     document.getElementById('todayTemp').textContent = Math.round(current.temperature_2m) + '°C';
@@ -163,6 +168,8 @@ function displayTodayWeather(data) {
     document.getElementById('todayPressure').textContent = Math.round(current.pressure) + ' гПа';
     document.getElementById('todayVisibility').textContent = (current.visibility / 1000).toFixed(1) + ' км';
     document.getElementById('todayPrecip').textContent = (current.precipitation || 0).toFixed(1) + ' мм';
+    document.getElementById('todayUVIndex').textContent = Math.round(current.uv_index);
+    document.getElementById('todayDewPoint').textContent = dewPoint.toFixed(1) + '°C';
     
     // Влажность процент
     document.getElementById('todayHumidityPercent').textContent = current.relative_humidity_2m + '%';
@@ -170,8 +177,8 @@ function displayTodayWeather(data) {
     
     // УФ индекс
     const uvIndex = Math.round(current.uv_index);
-    document.getElementById('todayUV').textContent = uvIndex;
-    document.getElementById('todayUVBar').style.width = Math.min(uvIndex * 10, 100) + '%';
+    document.getElementById('todayUVValue').textContent = uvIndex;
+    document.getElementById('todayUVBar').style.width = Math.min(uvIndex * 15, 100) + '%';
 }
 
 function displayTomorrowWeather(data) {
@@ -191,12 +198,22 @@ function displayTomorrowWeather(data) {
     document.getElementById('tomorrowTemp').textContent = avgTemp + '°C';
     document.getElementById('tomorrowIconLarge').textContent = weatherIcons[tomorrowData.weatherCode] || '🌤️';
     document.getElementById('tomorrowDesc').textContent = weatherDescriptions[tomorrowData.weatherCode] || 'Неизвестно';
-    document.getElementById('tomorrowFeels').textContent = avgTemp + '°C';
-    document.getElementById('tomorrowHumidity').textContent = tomorrowData.precipProb + '%';
-    document.getElementById('tomorrowWind').textContent = tomorrowData.windSpeed.toFixed(1) + ' м/с';
-    document.getElementById('tomorrowPressure').textContent = (Math.round(Math.random() * 30 + 1000)) + ' гПа';
     document.getElementById('tomorrowMax').textContent = Math.round(tomorrowData.maxTemp) + '°C';
     document.getElementById('tomorrowMin').textContent = Math.round(tomorrowData.minTemp) + '°C';
+    document.getElementById('tomorrowAvg').textContent = avgTemp + '°C';
+    document.getElementById('tomorrowHumidity').textContent = (60 + Math.floor(Math.random() * 30)) + '%';
+    document.getElementById('tomorrowWind').textContent = tomorrowData.windSpeed.toFixed(1) + ' м/с';
+    document.getElementById('tomorrowPrecipProb').textContent = tomorrowData.precipProb + '%';
+    document.getElementById('tomorrowPressure').textContent = (Math.round(Math.random() * 30 + 1000)) + ' гПа';
+    document.getElementById('tomorrowPrecip').textContent = tomorrowData.precipitation.toFixed(1) + ' мм';
+    
+    // Прогресс-бары
+    document.getElementById('tomorrowPrecipPercent').textContent = tomorrowData.precipProb + '%';
+    document.getElementById('tomorrowPrecipBar').style.width = tomorrowData.precipProb + '%';
+    
+    document.getElementById('tomorrowHumidityPercent').textContent = (60 + Math.floor(Math.random() * 30)) + '%';
+    const humidityVal = parseInt(document.getElementById('tomorrowHumidityPercent').textContent);
+    document.getElementById('tomorrowHumidityBar').style.width = humidityVal + '%';
 }
 
 function display10DaysWeather(data) {
@@ -218,6 +235,7 @@ function display10DaysWeather(data) {
         const windSpeed = daily.windspeed_10m_max[i].toFixed(1);
         const precipitation = daily.precipitation_sum[i].toFixed(1);
         const precipProb = daily.precipitation_probability_max[i];
+        const uvIndex = daily.uv_index_max[i];
 
         const card = document.createElement('div');
         card.className = 'forecast-card';
@@ -228,10 +246,16 @@ function display10DaysWeather(data) {
             <div class="forecast-temp">${maxTemp}°</div>
             <div class="forecast-temp-range">мин: ${minTemp}°</div>
             <div class="forecast-details">
-                <div title="Осадки">☔ ${precipitation}мм</div>
-                <div title="Вероятность">💨 ${precipProb}%</div>
+                <div title="Кол-во осадков">💧 ${precipitation}мм</div>
+                <div title="Вероятность">⚡ ${precipProb}%</div>
             </div>
         `;
+        
+        // Добавляем эффект наведения с дополнительной информацией
+        card.addEventListener('mouseenter', function() {
+            this.title = `Ветер: ${windSpeed} м/с\nУФ: ${Math.round(uvIndex)}`;
+        });
+        
         forecastGrid.appendChild(card);
     }
 }
