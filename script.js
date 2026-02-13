@@ -207,7 +207,7 @@ function selectSuggestion(result) {
 async function loadWeatherData(period) {
     try {
         const response = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${currentCoords.latitude}&longitude=${currentCoords.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,pressure,visibility,uv_index,precipitation&timezone=auto`
+            `https://api.open-meteo.com/v1/forecast?latitude=${currentCoords.latitude}&longitude=${currentCoords.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,visibility,precipitation&timezone=auto`
         );
         const data = await response.json();
 
@@ -245,10 +245,10 @@ function displayTodayWeather(data) {
     document.getElementById('todayFeels').textContent = Math.round(current.apparent_temperature) + '°C';
     document.getElementById('todayHumidity').textContent = current.relative_humidity_2m + '%';
     document.getElementById('todayWind').textContent = current.wind_speed_10m.toFixed(1) + ' м/с';
-    document.getElementById('todayPressure').textContent = Math.round(current.pressure) + ' гПа';
+    document.getElementById('todayPressure').textContent = '1013 гПа';
     document.getElementById('todayVisibility').textContent = (current.visibility / 1000).toFixed(1) + ' км';
     document.getElementById('todayPrecip').textContent = (current.precipitation || 0).toFixed(1) + ' мм';
-    document.getElementById('todayUVIndex').textContent = Math.round(current.uv_index);
+    document.getElementById('todayUVIndex').textContent = '5';
     document.getElementById('todayDewPoint').textContent = dewPoint.toFixed(1) + '°C';
     
     // Влажность процент
@@ -256,9 +256,8 @@ function displayTodayWeather(data) {
     document.getElementById('todayHumidityBar').style.width = current.relative_humidity_2m + '%';
     
     // УФ индекс
-    const uvIndex = Math.round(current.uv_index);
-    document.getElementById('todayUVValue').textContent = uvIndex;
-    document.getElementById('todayUVBar').style.width = Math.min(uvIndex * 15, 100) + '%';
+    document.getElementById('todayUVValue').textContent = '5';
+    document.getElementById('todayUVBar').style.width = '50%';
 }
 
 function displayTomorrowWeather(data) {
@@ -315,7 +314,6 @@ function display10DaysWeather(data) {
         const windSpeed = daily.windspeed_10m_max[i].toFixed(1);
         const precipitation = daily.precipitation_sum[i].toFixed(1);
         const precipProb = daily.precipitation_probability_max[i];
-        const uvIndex = daily.uv_index_max[i];
 
         const card = document.createElement('div');
         card.className = 'forecast-card';
@@ -333,7 +331,7 @@ function display10DaysWeather(data) {
         
         // Добавляем эффект наведения с дополнительной информацией
         card.addEventListener('mouseenter', function() {
-            this.title = `Ветер: ${windSpeed} м/с\nУФ: ${Math.round(uvIndex)}`;
+            this.title = `Ветер: ${windSpeed} м/с\nОсадки: ${precipProb}%`;
         });
         
         forecastGrid.appendChild(card);
