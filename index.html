@@ -13,6 +13,29 @@
         <div class="cloud cloud3"></div>
     </div>
 
+    <!-- SVG спрайт иконок -->
+    <svg style="display:none" aria-hidden="true">
+        <symbol id="icon-sun" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="12" fill="currentColor" />
+        </symbol>
+        <symbol id="icon-moon" viewBox="0 0 64 64">
+            <path d="M40 32a12 12 0 1 1-12-12 14 14 0 0 0 12 12z" fill="currentColor" />
+        </symbol>
+        <symbol id="icon-cloud" viewBox="0 0 64 64">
+            <path d="M20 40h28a8 8 0 0 0 0-16 12 12 0 0 0-23-3 8 8 0 0 0-5 19z" fill="currentColor" />
+        </symbol>
+        <symbol id="icon-rain" viewBox="0 0 64 64">
+            <path d="M20 36h28a8 8 0 0 0 0-16 12 12 0 0 0-23-3 8 8 0 0 0-5 19z" fill="currentColor" />
+            <g fill="currentColor"><path d="M24 46c0 3-3 6-3 6s-3-3-3-6 3-6 3-6 3 3 3 6z"/><path d="M36 46c0 3-3 6-3 6s-3-3-3-6 3-6 3-6 3 3 3 6z"/></g>
+        </symbol>
+        <symbol id="icon-snow" viewBox="0 0 64 64">
+            <g stroke="currentColor" stroke-width="2" fill="none"><path d="M32 20v24M20 28l24 8M20 36l24-8M24 24l16 16M24 40l16-16"/></g>
+        </symbol>
+        <symbol id="icon-thunder" viewBox="0 0 64 64">
+            <path d="M30 20l-8 18h10l-2 18 18-26H36z" fill="currentColor" />
+        </symbol>
+    </svg>
+
     <div class="container">
         <header>
             <div class="header-content">
@@ -71,7 +94,7 @@
 
                         <div class="details-grid">
                             <div class="detail-card">
-                                <div class="detail-icon">🌡️</div>
+                                <div class="detail-icon">️</div>
                                 <div class="detail-content">
                                     <span class="label">Ощущается</span>
                                     <span id="todayFeels" class="value">--°C</span>
@@ -126,6 +149,20 @@
                                     <span id="todayDewPoint" class="value">--°C</span>
                                 </div>
                             </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">🌅</div>
+                                <div class="detail-content">
+                                    <span class="label">Восход</span>
+                                    <span id="todaySunrise" class="value">--:--</span>
+                                </div>
+                            </div>
+                            <div class="detail-card">
+                                <div class="detail-icon">🌇</div>
+                                <div class="detail-content">
+                                    <span class="label">Закат</span>
+                                    <span id="todaySunset" class="value">--:--</span>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="progress-section">
@@ -143,6 +180,12 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <!-- Почасовой прогноз -->
+                <div class="hourly-wrapper">
+                    <h3>Почасовой прогноз (24 ч)</h3>
+                    <div class="hourly-forecast" id="hourlyForecast"></div>
+                    <canvas id="hourlyChart" width="800" height="120" aria-hidden="true"></canvas>
                 </div>
             </div>
 
@@ -166,7 +209,7 @@
 
                         <div class="details-grid">
                             <div class="detail-card">
-                                <div class="detail-icon">🌡️</div>
+                                <div class="detail-icon">�️</div>
                                 <div class="detail-content">
                                     <span class="label">Ощущается</span>
                                     <span id="tomorrowFeels" class="value">--°C</span>

@@ -9,33 +9,18 @@ let searchDebounceTimer = null;
 // Переменная для текущей темы
 let currentTheme = 'light';
 
-// Иконки погоды
-const weatherIcons = {
-    0: '☀️',
-    1: '🌤️',
-    2: '⛅',
-    3: '☁️',
-    45: '🌫️',
-    48: '🌫️',
-    51: '🌦️',
-    53: '🌦️',
-    55: '🌧️',
-    61: '🌧️',
-    63: '⛈️',
-    65: '⛈️',
-    71: '🌨️',
-    73: '🌨️',
-    75: '🌨️',
-    77: '🌨️',
-    80: '🌧️',
-    81: '⛈️',
-    82: '⛈️',
-    85: '🌨️',
-    86: '🌨️',
-    95: '⛈️',
-    96: '⛈️',
-    99: '⛈️'
-};
+// Функция выбора SVG-иконки по weathercode
+function getWeatherIconSvg(code, hour = null) {
+    // определим день/ночь по часу, если указан
+    const isNight = (hour !== null) ? (hour < 6 || hour >= 19) : false;
+    if (code === 0) return `<svg class="icon" viewBox="0 0 64 64"><use href="#icon-${isNight ? 'moon' : 'sun'}"/></svg>`;
+    if (code === 1 || code === 2) return `<svg class="icon" viewBox="0 0 64 64"><use href="#icon-cloud"/></svg>`;
+    if (code === 3 || code === 45 || code === 48) return `<svg class="icon" viewBox="0 0 64 64"><use href="#icon-cloud"/></svg>`;
+    if ([51,53,55,61,63,65,80,81,82].includes(code)) return `<svg class="icon" viewBox="0 0 64 64"><use href="#icon-rain"/></svg>`;
+    if ([71,73,75,77,85,86].includes(code)) return `<svg class="icon" viewBox="0 0 64 64"><use href="#icon-snow"/></svg>`;
+    if ([95,96,99].includes(code)) return `<svg class="icon" viewBox="0 0 64 64"><use href="#icon-thunder"/></svg>`;
+    return `<svg class="icon" viewBox="0 0 64 64"><use href="#icon-cloud"/></svg>`;
+}
 
 const weatherDescriptions = {
     0: 'Ясно',
@@ -78,6 +63,12 @@ function applyTheme(theme) {
     currentTheme = theme;
     localStorage.setItem('theme', theme);
     updateThemeButton();
+}
+
+// Безопасно устанавливает innerHTML (для иконок SVG и мелкого форматирования)
+function safeSetHTML(id, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
 }
 
 function toggleTheme() {
@@ -305,7 +296,10 @@ function selectSuggestion(result) {
 async function loadWeatherData(period) {
     try {
         const response = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${currentCoords.latitude}&longitude=${currentCoords.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,visibility,precipitation&timezone=auto`
+            `https://api.open-meteo.com/v1/forecast?latitude=${currentCoords.latitude}&longitude=${currentCoords.longitude}` +
+            `&current_weather=true&hourly=temperature_2m,apparent_temperature,relativehumidity_2m,weathercode,wind_speed_10m,visibility,precipitation` +
+            `&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,sunrise,sunset` +
+            `&timezone=auto`
         );
         const data = await response.json();
 
@@ -348,7 +342,7 @@ async function loadWeatherData(period) {
             };
         }
 
-        const normalized = { current: current, daily: data.daily || {} };
+        const normalized = { current: current, daily: data.daily || {}, hourly: data.hourly || {}, raw: data };
 
         // Сброс сообщений об ошибке при успешном ответе
         showStatus('');
@@ -408,7 +402,8 @@ function displayTodayWeather(data) {
     safeSetText('todayCity', currentCity);
     safeSetText('todayTime', '🕐 ' + timeStr);
     safeSetText('todayTemp', Math.round(current.temperature_2m) + '°C');
-    safeSetText('todayIconLarge', weatherIcons[weatherCode] || '🌤️');
+    // SVG иконка
+    safeSetHTML('todayIconLarge', getWeatherIconSvg(weatherCode, new Date().getHours()));
     safeSetText('todayDesc', weatherDescriptions[weatherCode] || 'Неизвестно');
     safeSetText('todayFeels', Math.round(current.apparent_temperature) + '°C');
     safeSetText('todayHumidity', current.relative_humidity_2m + '%');
@@ -426,6 +421,98 @@ function displayTodayWeather(data) {
     // УФ индекс
     safeSetText('todayUV', '5');
     safeSetWidth('todayUVBar', '50%');
+    // Восход/закат если есть
+    if (data.daily && data.daily.sunrise && data.daily.sunrise[0]) {
+        const sr = new Date(data.daily.sunrise[0]);
+        const ss = new Date(data.daily.sunset[0]);
+        safeSetText('todaySunrise', sr.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }));
+        safeSetText('todaySunset', ss.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }));
+    }
+
+    // Почасовой прогноз
+    if (data.hourly) {
+        renderHourly(data);
+    }
+}
+
+// Отобразить почасовой прогноз (24 часа)
+function renderHourly(data) {
+    const hourly = data.hourly || {};
+    const times = hourly.time || [];
+    const temps = hourly.temperature_2m || [];
+    const codes = hourly.weathercode || [];
+    if (!times.length || !temps.length) return;
+
+    const now = new Date();
+    // найти индекс ближайшего часа (>= сейчас)
+    let startIdx = times.findIndex(t => new Date(t) >= now);
+    if (startIdx === -1) startIdx = 0;
+
+    const hourlyContainer = document.getElementById('hourlyForecast');
+    const canvas = document.getElementById('hourlyChart');
+    if (!hourlyContainer) return;
+    hourlyContainer.innerHTML = '';
+
+    const slice = [];
+    for (let i = startIdx; i < Math.min(startIdx + 24, times.length); i++) {
+        const dt = new Date(times[i]);
+        const hourStr = dt.toLocaleTimeString('ru-RU', { hour: '2-digit' });
+        const temp = Math.round(temps[i]);
+        const code = codes[i];
+
+        const card = document.createElement('div');
+        card.className = 'hourly-card';
+        const iconSvg = getWeatherIconSvg(code, dt.getHours());
+        card.innerHTML = `<div class="hourly-time">${hourStr}</div><div class="hourly-icon">${iconSvg}</div><div class="hourly-temp">${temp}°</div>`;
+        hourlyContainer.appendChild(card);
+        slice.push(temp);
+    }
+
+    // нарисовать график
+    if (canvas && slice.length) {
+        drawHourlyChart(canvas, slice);
+    }
+}
+
+// Простейший рендер линейного графика на canvas
+function drawHourlyChart(canvas, temps) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = Math.min(800, canvas.parentElement ? canvas.parentElement.clientWidth : 800);
+    const h = canvas.height = 120;
+    ctx.clearRect(0,0,w,h);
+
+    const padding = 12;
+    const maxT = Math.max(...temps);
+    const minT = Math.min(...temps);
+    const range = Math.max(1, maxT - minT);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    temps.forEach((t, i) => {
+        const x = padding + (i / (temps.length - 1)) * (w - padding * 2);
+        const y = h - padding - ((t - minT) / range) * (h - padding * 2);
+        if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+
+    // заливка градиентом
+    const grad = ctx.createLinearGradient(0,0,0,h);
+    grad.addColorStop(0, 'rgba(255,255,255,0.06)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.lineTo(w - padding, h - padding);
+    ctx.lineTo(padding, h - padding);
+    ctx.closePath();
+    ctx.fill();
+
+    // точки
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    temps.forEach((t, i) => {
+        const x = padding + (i / (temps.length - 1)) * (w - padding * 2);
+        const y = h - padding - ((t - minT) / range) * (h - padding * 2);
+        ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+    });
 }
 
 function displayTomorrowWeather(data) {

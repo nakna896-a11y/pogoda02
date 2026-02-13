@@ -355,6 +355,42 @@ header {
     color: var(--suggestion-hover-text);
 }
 
+/* Почасовой прогноз */
+.hourly-wrapper {
+    margin-top: 18px;
+}
+.hourly-wrapper h3 {
+    color: var(--text-dark);
+    margin: 12px 0;
+    font-size: 1.05rem;
+}
+.hourly-forecast {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 6px;
+}
+.hourly-card {
+    min-width: 84px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 8px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+}
+.hourly-time { font-size: 0.9rem; margin-bottom: 6px; }
+.hourly-temp { font-weight:700; font-size:1rem; }
+.hourly-icon { font-size: 1.2rem; margin: 6px 0; }
+
+/* График */
+#hourlyChart { width: 100%; max-width: 100%; display: block; margin-top: 10px; border-radius: 8px; background: transparent; }
+
+/* Улучшение больших иконок */
+.weather-icon-large svg { width: 84px; height: 84px; display:block; }
+.weather-icon-large { display:flex; align-items:center; justify-content:center; }
+
 .suggestion-icon {
     font-size: 1.5em;
 }
