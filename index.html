@@ -6,7 +6,7 @@
     <title>WeatherPro - Прогноз Погоды</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-theme="light">
     <div class="background-animation">
         <div class="cloud cloud1"></div>
         <div class="cloud cloud2"></div>
@@ -31,6 +31,9 @@
                 </div>
                 <div class="status-wrapper">
                     <div id="statusMsg" class="status-msg" aria-live="polite"></div>
+                </div>
+                <div class="theme-toggle">
+                    <button id="themeBtn" class="theme-btn" title="Переключить тему">🌙</button>
                 </div>
             </div>
         </header>

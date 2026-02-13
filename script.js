@@ -6,6 +6,9 @@ let currentCity = 'Москва';
 let suggestionsCache = {};
 let searchDebounceTimer = null;
 
+// Переменная для текущей темы
+let currentTheme = 'light';
+
 // Иконки погоды
 const weatherIcons = {
     0: '☀️',
@@ -61,8 +64,37 @@ const weatherDescriptions = {
     99: 'Сильная гроза с градом'
 };
 
+// Функции управления темой
+function initializeTheme() {
+    // Загрузить сохраненную тему из localStorage
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    currentTheme = savedTheme;
+    applyTheme(currentTheme);
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
+    currentTheme = theme;
+    localStorage.setItem('theme', theme);
+    updateThemeButton();
+}
+
+function toggleTheme() {
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    applyTheme(newTheme);
+}
+
+function updateThemeButton() {
+    const themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) {
+        themeBtn.textContent = currentTheme === 'light' ? '🌙' : '☀️';
+    }
+}
+
 // Инициализация
 document.addEventListener('DOMContentLoaded', () => {
+    initializeTheme();
     setupEventListeners();
     loadWeatherData('today');
     // Автообновление каждые 30 минут
@@ -70,6 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
+    // Обработчик переключения темы
+    const themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', toggleTheme);
+    }
     // Обработчики кнопок выбора периода
     document.querySelectorAll('.period-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
