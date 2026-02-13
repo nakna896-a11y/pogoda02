@@ -27,6 +27,18 @@ body {
     overflow-x: hidden;
 }
 
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 /* Фоновая анимация */
 .background-animation {
     position: fixed;
@@ -61,6 +73,7 @@ body {
     height: 50px;
     top: 10%;
     left: -150px;
+    animation: none;
 }
 
 .cloud1::before {
@@ -82,6 +95,7 @@ body {
     height: 60px;
     top: 25%;
     right: -180px;
+    animation: none;
 }
 
 .cloud3 {
@@ -89,6 +103,25 @@ body {
     height: 55px;
     top: 55%;
     left: -160px;
+    animation: none;
+}
+
+@keyframes float {
+    from {
+        transform: translateX(0) translateY(0);
+    }
+    25% {
+        transform: translateX(100px) translateY(-30px);
+    }
+    50% {
+        transform: translateX(200px) translateY(-50px);
+    }
+    75% {
+        transform: translateX(150px) translateY(-25px);
+    }
+    to {
+        transform: translateX(calc(100vw + 250px)) translateY(0);
+    }
 }
 
 .container {
@@ -105,7 +138,17 @@ header {
     border: 2px solid rgba(255, 255, 255, 0.15);
     margin-bottom: 50px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .header-content {
@@ -123,8 +166,18 @@ header {
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     font-weight: 800;
     letter-spacing: -1px;
+    animation: fadeInLeft 1s ease;
 }
 
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .tagline {
@@ -132,13 +185,15 @@ header {
     font-size: 1.1em;
     font-weight: 300;
     letter-spacing: 1px;
+    animation: fadeInLeft 1.2s ease;
 }
 
 .search-box {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
-}}
+    animation: fadeInRight 1s ease;
+}
 
 .search-wrapper {
     position: relative;
@@ -200,17 +255,30 @@ header {
     overflow-y: auto;
     display: none;
     z-index: 1000;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .suggestions-list.active {
     display: block;
 }
 
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .suggestion-item {
     padding: 14px 20px;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: all 0.2s ease;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
@@ -275,16 +343,28 @@ header {
     color: white;
     font-weight: bold;
     cursor: pointer;
-    transition: opacity 0.2s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
     font-size: 1.3em;
+    animation: pulse 2s infinite;
 }
 
 .search-box button:hover {
-    opacity: 0.9;
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(245, 87, 108, 0.5);
 }
 
 .search-box button:active {
     transform: translateY(-2px) scale(0.98);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+    }
+    50% {
+        box-shadow: 0 8px 40px rgba(245, 87, 108, 0.6);
+    }
 }
 
 .buttons-container {
@@ -293,6 +373,18 @@ header {
     justify-content: center;
     margin-bottom: 50px;
     flex-wrap: wrap;
+    animation: slideInUp 1s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .period-btn {
@@ -305,10 +397,6 @@ header {
     border-radius: 50px;
     cursor: pointer;
     transition: background 0.2s ease;
-    font-size: 1.15em;
-    font-weight: 700;
-    border-radius: 50px;
-    cursor: pointer;
     letter-spacing: 0.5px;
 }
 
@@ -320,20 +408,40 @@ header {
 .period-btn.active {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     border-color: transparent;
-}}
+}
 
 .content {
     min-height: 600px;
+    animation: fadeIn 1s ease 0.3s both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .weather-section {
     display: none;
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .weather-section.active {
     display: block;
 }
 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .weather-main {
@@ -346,7 +454,7 @@ header {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 30px;
     padding: 50px;
-    
+    backdrop-filter: blur(20px);
     border: 2px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     flex: 1;
@@ -365,10 +473,14 @@ header {
     height: 200%;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 50px 50px;
-    
+    animation: moveBackground 20s linear infinite;
     opacity: 0.5;
 }
 
+@keyframes moveBackground {
+    0% {
+        transform: translate(0, 0);
+    }
     100% {
         transform: translate(50px, 50px);
     }
@@ -433,11 +545,15 @@ header {
 
 .weather-icon-large {
     font-size: 7em;
-    
+    animation: bounce 3s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
     display: inline-block;
     filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.2));
 }
 
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
     25% {
         transform: translateY(-20px) scale(1.05);
     }
@@ -460,9 +576,14 @@ header {
     text-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
     line-height: 1;
     letter-spacing: -2px;
-    
+    animation: fadeInScale 1s ease 0.3s both;
 }
 
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
     to {
         opacity: 1;
         transform: scale(1);
@@ -475,7 +596,7 @@ header {
     margin-top: 12px;
     font-weight: 600;
     letter-spacing: 0.3px;
-    
+    animation: fadeInScale 1s ease 0.5s both;
 }
 
 /* Детальные карточки */
@@ -499,7 +620,7 @@ header {
     align-items: center;
     text-align: center;
     gap: 12px;
-    
+    backdrop-filter: blur(15px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     position: relative;
@@ -530,11 +651,15 @@ header {
 
 .detail-icon {
     font-size: 2.8em;
-    
+    animation: iconFloat 3s ease-in-out infinite;
     position: relative;
     z-index: 1;
 }
 
+@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
     50% {
         transform: translateY(-8px);
     }
@@ -580,7 +705,7 @@ header {
     padding: 25px;
     border-radius: 20px;
     border: 1.5px solid rgba(255, 255, 255, 0.12);
-    
+    backdrop-filter: blur(15px);
 }
 
 .progress-label {
@@ -605,9 +730,13 @@ header {
     border-radius: 15px;
     transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 0 15px rgba(245, 87, 108, 0.5);
-    
+    animation: shimmer 2s infinite;
 }
 
+@keyframes shimmer {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(245, 87, 108, 0.5);
+    }
     50% {
         box-shadow: 0 0 25px rgba(245, 87, 108, 0.8);
     }
@@ -616,9 +745,14 @@ header {
 /* Раздел с 10 дней */
 .section-header {
     margin-bottom: 40px;
-    
+    animation: slideInLeft 0.8s ease;
 }
 
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
     to {
         opacity: 1;
         transform: translateX(0);
@@ -642,7 +776,7 @@ header {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 22px;
     padding: 22px;
-    
+    backdrop-filter: blur(20px);
     border: 1.5px solid rgba(255, 255, 255, 0.15);
     text-align: center;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -690,7 +824,7 @@ header {
     font-size: 3.5em;
     margin: 14px 0;
     display: inline-block;
-    
+    animation: bounce 3s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
     position: relative;
     z-index: 1;
@@ -741,8 +875,8 @@ footer {
     margin-top: 80px;
     padding: 40px 20px;
     border-top: 2px solid rgba(255, 255, 255, 0.15);
-    
-    
+    backdrop-filter: blur(10px);
+    animation: slideInUp 1s ease 0.8s both;
 }
 
 .footer-content {
@@ -955,7 +1089,7 @@ footer {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 100px;
     opacity: 0.3;
-    
+    animation: float 20s infinite;
 }
 
 .cloud1 {
@@ -963,7 +1097,7 @@ footer {
     height: 40px;
     top: 10%;
     left: -100px;
-    
+    animation: float 20s infinite;
 }
 
 .cloud2 {
@@ -971,7 +1105,7 @@ footer {
     height: 60px;
     top: 20%;
     right: -150px;
-    
+    animation: float 25s infinite reverse;
 }
 
 .cloud3 {
@@ -979,9 +1113,13 @@ footer {
     height: 50px;
     top: 50%;
     left: -120px;
-    
+    animation: float 30s infinite;
 }
 
+@keyframes float {
+    from {
+        transform: translateX(0) translateY(0);
+    }
     50% {
         transform: translateX(100px) translateY(-20px);
     }
@@ -1001,7 +1139,7 @@ header {
     background: rgba(255, 255, 255, 0.1);
     padding: 30px;
     border-radius: 20px;
-    
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     margin-bottom: 40px;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -1087,7 +1225,7 @@ header {
     border-radius: 30px;
     cursor: pointer;
     transition: all 0.3s ease;
-    
+    backdrop-filter: blur(10px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -1111,13 +1249,18 @@ header {
 
 .weather-section {
     display: none;
-    
+    animation: fadeInUp 0.6s ease;
 }
 
 .weather-section.active {
     display: block;
 }
 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1134,7 +1277,7 @@ header {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 40px;
-    
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     flex: 1;
@@ -1186,9 +1329,13 @@ header {
 
 .weather-icon-large {
     font-size: 6em;
-    
+    animation: bounce 2s infinite;
 }
 
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
     50% {
         transform: translateY(-10px);
     }
@@ -1312,7 +1459,7 @@ header {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 15px;
     padding: 18px;
-    
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     text-align: center;
     transition: all 0.3s ease;
@@ -1338,7 +1485,7 @@ header {
     font-size: 3em;
     margin: 12px 0;
     display: inline-block;
-    
+    animation: bounce 2s infinite;
 }
 
 .forecast-temp {

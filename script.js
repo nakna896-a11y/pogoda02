@@ -2,7 +2,7 @@
 let currentCoords = { latitude: 55.7558, longitude: 37.6173 }; // Москва по умолчанию
 let currentCity = 'Москва';
 
-// Кэш для результатов поиска и debounce таймер
+// Кэш для poиска и debounce
 let suggestionsCache = {};
 let searchDebounceTimer = null;
 
@@ -88,25 +88,25 @@ function setupEventListeners() {
         if (e.key === 'Enter') searchCity();
     });
 
-    // Обработчик ввода для подсказок с debounce
+    // Обработчик ввода для подсказок (с debounce для одновремени запросов)
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.trim();
         
-        // Отменяем предыдущий таймер
+        // Отменяем предыдущий debounce таймер
         if (searchDebounceTimer) {
             clearTimeout(searchDebounceTimer);
         }
         
         if (query.length > 1) {
-            // Если результат в кэше, показываем сразу
+            // Если в кэше, показываем сразу
             if (suggestionsCache[query]) {
                 showSuggestionsFromCache(query);
             } else {
-                // Иначе ждём 500мс перед запросом
+                // Иначе ждём 300мс перед API запросом
                 searchDebounceTimer = setTimeout(() => {
                     showSuggestions(query);
-                }, 500);
+                }, 300);
             }
         } else {
             hideSuggestions();
@@ -168,12 +168,12 @@ async function showSuggestions(query) {
         );
         const data = await response.json();
         
-        // Кэшируем результат
+        // Кэш результат
         if (data.results) {
             suggestionsCache[query] = data.results;
         }
         
-        renderSuggestions(data.results || []);
+        renderSuggestionsUI(data.results || []);
     } catch (error) {
         console.error('Ошибка при получении подсказок:', error);
     }
@@ -181,10 +181,10 @@ async function showSuggestions(query) {
 
 function showSuggestionsFromCache(query) {
     const results = suggestionsCache[query] || [];
-    renderSuggestions(results);
+    renderSuggestionsUI(results);
 }
 
-function renderSuggestions(results) {
+function renderSuggestionsUI(results) {
     const suggestionsList = document.getElementById('suggestionsList');
 
     if (results && results.length > 0) {
@@ -217,6 +217,7 @@ function renderSuggestions(results) {
         suggestionsList.innerHTML = '';
         suggestionsList.classList.remove('active');
     }
+}
 
 function hideSuggestions() {
     const suggestionsList = document.getElementById('suggestionsList');
@@ -311,19 +312,6 @@ function showStatus(text, isError = false) {
     }
 }
 
-// Утилиты для безопасного доступа к элементам (предотвращают ошибки, если элемент не найден)
-function safeSetText(id, text) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = text;
-}
-
-function safeSetWidth(id, width) {
-    const el = document.getElementById(id);
-    if (!el || !el.style) return;
-    el.style.width = width;
-}
-
 function displayTodayWeather(data) {
     const current = data.current;
     const daily = data.daily;
@@ -337,27 +325,27 @@ function displayTodayWeather(data) {
     const humidity = current.relative_humidity_2m;
     const dewPoint = temp - (100 - humidity) / 5;
     
-    safeSetText('todayCity', currentCity);
-    safeSetText('todayTime', '🕐 ' + timeStr);
-    safeSetText('todayTemp', Math.round(current.temperature_2m) + '°C');
-    safeSetText('todayIconLarge', weatherIcons[weatherCode] || '🌤️');
-    safeSetText('todayDesc', weatherDescriptions[weatherCode] || 'Неизвестно');
-    safeSetText('todayFeels', Math.round(current.apparent_temperature) + '°C');
-    safeSetText('todayHumidity', current.relative_humidity_2m + '%');
-    safeSetText('todayWind', current.wind_speed_10m.toFixed(1) + ' м/с');
-    safeSetText('todayPressure', '1013 гПа');
-    safeSetText('todayVisibility', (current.visibility / 1000).toFixed(1) + ' км');
-    safeSetText('todayPrecip', (current.precipitation || 0).toFixed(1) + ' мм');
-    safeSetText('todayUVIndex', '5');
-    safeSetText('todayDewPoint', dewPoint.toFixed(1) + '°C');
-
+    document.getElementById('todayCity').textContent = currentCity;
+    document.getElementById('todayTime').textContent = '🕐 ' + timeStr;
+    document.getElementById('todayTemp').textContent = Math.round(current.temperature_2m) + '°C';
+    document.getElementById('todayIconLarge').textContent = weatherIcons[weatherCode] || '🌤️';
+    document.getElementById('todayDesc').textContent = weatherDescriptions[weatherCode] || 'Неизвестно';
+    document.getElementById('todayFeels').textContent = Math.round(current.apparent_temperature) + '°C';
+    document.getElementById('todayHumidity').textContent = current.relative_humidity_2m + '%';
+    document.getElementById('todayWind').textContent = current.wind_speed_10m.toFixed(1) + ' м/с';
+    document.getElementById('todayPressure').textContent = '1013 гПа';
+    document.getElementById('todayVisibility').textContent = (current.visibility / 1000).toFixed(1) + ' км';
+    document.getElementById('todayPrecip').textContent = (current.precipitation || 0).toFixed(1) + ' мм';
+    document.getElementById('todayUVIndex').textContent = '5';
+    document.getElementById('todayDewPoint').textContent = dewPoint.toFixed(1) + '°C';
+    
     // Влажность процент
-    safeSetText('todayHumidityPercent', current.relative_humidity_2m + '%');
-    safeSetWidth('todayHumidityBar', current.relative_humidity_2m + '%');
-
-    // УФ индекс — исправлено имя элемента: использую `todayUV`, если он есть
-    safeSetText('todayUV', '5');
-    safeSetWidth('todayUVBar', '50%');
+    document.getElementById('todayHumidityPercent').textContent = current.relative_humidity_2m + '%';
+    document.getElementById('todayHumidityBar').style.width = current.relative_humidity_2m + '%';
+    
+    // УФ индекс
+    document.getElementById('todayUVValue').textContent = '5';
+    document.getElementById('todayUVBar').style.width = '50%';
 }
 
 function displayTomorrowWeather(data) {
